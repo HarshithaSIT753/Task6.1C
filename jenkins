@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                // Print message indicating the start of the Build stage
+               
                 echo 'Starting Build stage...'
                 // Build the code using Maven
                 sh 'mvn clean package'
@@ -12,7 +12,7 @@ pipeline {
         }
         stage('Unit and Integration Tests') {
             steps {
-                // Print message indicating the start of the Unit and Integration Tests stage
+  
                 echo 'Starting Unit and Integration Tests stage...'
                 // Run unit tests using JUnit
                 sh 'mvn test'
@@ -65,6 +65,7 @@ pipeline {
     post {
         success {
             // Send email notification for successful build
+            
             emailext body: "Build successful",
                 subject: "Pipeline Success",
                 to: "s224120377@deakin.edu.au"
