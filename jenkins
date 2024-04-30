@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Code Analysis') {
             steps {
-                // Print message indicating the start of the Code Analysis stage
+            
                 echo 'Starting Code Analysis stage...'
                 // Integrate code analysis tools like Checkstyle, PMD, or SonarQube
                 // Add appropriate commands here
@@ -30,7 +30,7 @@ pipeline {
         }
         stage('Security Scan') {
             steps {
-                // Print message indicating the start of the Security Scan stage
+               
                 echo 'Starting Security Scan stage...'
                 // Perform security scan using OWASP ZAP or SonarQube Security Scanner
                 // Add appropriate commands here
@@ -38,7 +38,7 @@ pipeline {
         }
         stage('Deploy to Staging') {
             steps {
-                // Print message indicating the start of the Deploy to Staging stage
+               
                 echo 'Starting Deploy to Staging stage...'
                 // Deploy the application to a staging server using Jenkins SSH plugin or AWS CLI
                 // Add appropriate commands here
@@ -46,7 +46,7 @@ pipeline {
         }
         stage('Integration Tests on Staging') {
             steps {
-                // Print message indicating the start of the Integration Tests on Staging stage
+              
                 echo 'Starting Integration Tests on Staging stage...'
                 // Run integration tests on the staging environment using Selenium or Postman
                 // Add appropriate commands here
@@ -54,7 +54,7 @@ pipeline {
         }
         stage('Deploy to Production') {
             steps {
-                // Print message indicating the start of the Deploy to Production stage
+              
                 echo 'Starting Deploy to Production stage...'
                 // Deploy the application to a production server using Jenkins SSH plugin or AWS CLI
                 // Add appropriate commands here
@@ -69,7 +69,7 @@ pipeline {
             emailext body: "Build successful",
                 subject: "Pipeline Success",
                 to: "s224120377@deakin.edu.au"
-            // Print message indicating successful build in console
+            
             echo 'Pipeline execution successful!'
             // Attach logs to the email
             // Add appropriate commands here
@@ -79,7 +79,6 @@ pipeline {
             emailext body: "Build failed",
                 subject: "Pipeline Failure",
                 to: "s224120377@deakin.edu.au"
-            // Print message indicating failed build in console
             echo 'Pipeline execution failed!'
             // Attach logs to the email
             // Add appropriate commands here
