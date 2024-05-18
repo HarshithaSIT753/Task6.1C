@@ -5,76 +5,94 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the code...'
+                // Example: Running a Maven build
+                sh 'mvn clean install'
             }
         }
         stage('Unit and Integration Tests') {
-            steps {
-                echo 'Running unit tests...'
-                // Example: Using JUnit for unit tests
-                echo 'Running integration tests...'
-                // Example: Using Selenium for integration tests
+            parallel {
+                stage('Unit Tests') {
+                    steps {
+                        echo 'Running unit tests...'
+                        // Example: Running JUnit tests
+                        sh 'mvn test'
+                        junit '**/target/surefire-reports/*.xml'
+                    }
+                }
+                stage('Integration Tests') {
+                    steps {
+                        echo 'Running integration tests...'
+                        // Example: Running integration tests with Maven
+                        sh 'mvn verify -Pintegration-tests'
+                        junit '**/target/failsafe-reports/*.xml'
+                    }
+                }
             }
         }
         stage('Code Analysis') {
             steps {
                 echo 'Analyzing code...'
-                // Example: Using SonarQube for code analysis
+                // Example: Running SonarQube analysis
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn sonar:sonar'
+                }
             }
         }
         stage('Security Scan') {
             steps {
                 echo 'Performing security scan...'
-                // Example: Using OWASP ZAP for security scan
+                // Example: Running OWASP ZAP scan
+                sh 'zap-cli quick-scan --self-contained --start-options "-config api.disablekey=true" http://localhost:8080'
+                // Archive the ZAP report
+                archiveArtifacts artifacts: 'zap_report.html', allowEmptyArchive: true
             }
         }
         stage('Deploy to Staging') {
             steps {
                 echo 'Deploying to staging server...'
-                // Example: Using Jenkins Deploy Plugin or AWS CLI for deployment
+                // Example: Using AWS CLI for deployment
+                sh 'aws s3 cp target/my-app.jar s3://my-staging-bucket/'
+                // Example: Triggering deployment script
+                sh 'ssh user@staging-server "deploy-script.sh"'
             }
         }
         stage('Integration Tests on Staging') {
             steps {
                 echo 'Running integration tests on staging...'
-                // Example: Using Selenium for integration tests
+                // Example: Running Selenium tests
+                sh 'mvn verify -Pstaging-tests'
+                junit '**/target/failsafe-reports/*.xml'
             }
         }
         stage('Deploy to Production') {
             steps {
+                input 'Deploy to production?'
                 echo 'Deploying to production server...'
-                // Example: Using Jenkins Deploy Plugin or AWS CLI for deployment
+                // Example: Using AWS CLI for deployment
+                sh 'aws s3 cp target/my-app.jar s3://my-production-bucket/'
+                // Example: Triggering deployment script
+                sh 'ssh user@production-server "deploy-script.sh"'
             }
         }
     }
 
     post {           
-        success {
-            emailext(
-                subject: 'SUCCESS: Jenkins Pipeline',
-                body: '''<html>
-                            <body>
-                         <p>The Pipeline build successful.</p>
-                         <p>Check console output at <a href="${BUILD_URL}console">here</a> to view the full results.</p>
-                            </body>
-                          </html>''',
-                to: 'harshihitesh@gmail.com',
-                mimeType: 'text/html',
-                attachLog: true
-            )
-        }
-        failure {
-            emailext(
-                subject: 'FAILURE: Jenkins Pipeline',
-                body: '''<html>
-                            <body>
-                             <p>The Pipeline has failed.</p>
-                             <p>Check console output at <a href="${BUILD_URL}console">here</a> to view the full results.</p>
-                            </body>
-                          </html>''',
-                to: 'harshihitesh@gmail.com',
-                mimeType: 'text/html',
-                attachLog: true
-            )
+        always {
+            script {
+                def currentResult = currentBuild.currentResult
+                emailext(
+                    subject: "${currentResult}: Jenkins Pipeline",
+                    body: """<html>
+                                <body>
+                                 <p>The Pipeline ${currentResult.toLowerCase()}.</p>
+                                 <p>Check console output at <a href="${BUILD_URL}console">here</a> to view the full results.</p>
+                                </body>
+                              </html>""",
+                    to: 'harshihitesh@gmail.com',
+                    mimeType: 'text/html',
+                    attachLog: true
+                )
+            }
         }
     }
 }
