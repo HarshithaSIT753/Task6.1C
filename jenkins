@@ -1,62 +1,80 @@
 pipeline {
     agent any
-    environment {
-        DIRECTORY_PATH = "/path/to/code/directory"
-        TESTING_ENVIRONMENT = "TestingEnvironment"
-        PRODUCTION_ENVIRONMENT = "YourNameProduction"
-    }
+
     stages {
         stage('Build') {
             steps {
-                echo "Fetch the source code from the directory path specified by the environment variable: ${DIRECTORY_PATH}"
-                echo "Compile the code and generate any necessary artifacts"
+                echo 'Building the code...'
             }
         }
-        stage('Unit and Integration Test') {
+        stage('Unit and Integration Tests') {
             steps {
-                echo "Running unit tests..."
-                echo "Running integration tests..."
+                echo 'Running unit tests...'
+                // Example: Using JUnit for unit tests
+                echo 'Running integration tests...'
+                // Example: Using Selenium for integration tests
             }
         }
         stage('Code Analysis') {
             steps {
-                echo "Check the quality of the code..."
+                echo 'Analyzing code...'
+                // Example: Using SonarQube for code analysis
             }
         }
         stage('Security Scan') {
             steps {
-                echo "Deploy the application to a testing environment specified by the environment variable: ${TESTING_ENVIRONMENT}"
+                echo 'Performing security scan...'
+                // Example: Using OWASP ZAP for security scan
             }
         }
         stage('Deploy to Staging') {
             steps {
-                echo "Waiting for approval..."
-                sleep time: 10, unit: 'SECONDS'
+                echo 'Deploying to staging server...'
+                // Example: Using Jenkins Deploy Plugin or AWS CLI for deployment
             }
         }
         stage('Integration Tests on Staging') {
             steps {
-                echo "Deploying the code to the production environment (${PRODUCTION_ENVIRONMENT})..."
+                echo 'Running integration tests on staging...'
+                // Example: Using Selenium for integration tests
             }
         }
         stage('Deploy to Production') {
             steps {
-                echo "Deploying the code to the production environment (${PRODUCTION_ENVIRONMENT})..."
+                echo 'Deploying to production server...'
+                // Example: Using Jenkins Deploy Plugin or AWS CLI for deployment
             }
         }
     }
-    post {
+
+    post {           
         success {
-            emailext body: "Build successful",
-                subject: "Pipeline Success",
-                to: "harshihitesh@gmail.com"
-            echo 'Pipeline execution successful!'
+            emailext(
+                subject: 'SUCCESS: Jenkins Pipeline',
+                body: '''<html>
+                            <body>
+                         <p>The Pipeline build successful.</p>
+                         <p>Check console output at <a href="${BUILD_URL}console">here</a> to view the full results.</p>
+                            </body>
+                          </html>''',
+                to: 'harshihitesh@gmail.com',
+                mimeType: 'text/html',
+                attachLog: true
+            )
         }
         failure {
-            emailext body: "Build failed",
-                subject: "Pipeline Failure",
-                to: "harshihitesh@gmail.com"
-            echo 'Pipeline execution failed!'
+            emailext(
+                subject: 'FAILURE: Jenkins Pipeline',
+                body: '''<html>
+                            <body>
+                             <p>The Pipeline has failed.</p>
+                             <p>Check console output at <a href="${BUILD_URL}console">here</a> to view the full results.</p>
+                            </body>
+                          </html>''',
+                to: 'harshihitesh@gmail.com',
+                mimeType: 'text/html',
+                attachLog: true
+            )
         }
     }
 }
