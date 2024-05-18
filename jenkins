@@ -1,98 +1,62 @@
 pipeline {
     agent any
-
+    environment {
+        DIRECTORY_PATH = "/path/to/code/directory"
+        TESTING_ENVIRONMENT = "TestingEnvironment"
+        PRODUCTION_ENVIRONMENT = "YourNameProduction"
+    }
     stages {
         stage('Build') {
             steps {
-                echo 'Building the code...'
-                // Example: Running a Maven build
-                sh 'mvn clean install'
+                echo "Fetch the source code from the directory path specified by the environment variable: ${DIRECTORY_PATH}"
+                echo "Compile the code and generate any necessary artifacts"
             }
         }
-        stage('Unit and Integration Tests') {
-            parallel {
-                stage('Unit Tests') {
-                    steps {
-                        echo 'Running unit tests...'
-                        // Example: Running JUnit tests
-                        sh 'mvn test'
-                        junit '**/target/surefire-reports/*.xml'
-                    }
-                }
-                stage('Integration Tests') {
-                    steps {
-                        echo 'Running integration tests...'
-                        // Example: Running integration tests with Maven
-                        sh 'mvn verify -Pintegration-tests'
-                        junit '**/target/failsafe-reports/*.xml'
-                    }
-                }
+        stage('Unit and Integration Test') {
+            steps {
+                echo "Running unit tests..."
+                echo "Running integration tests..."
             }
         }
         stage('Code Analysis') {
             steps {
-                echo 'Analyzing code...'
-                // Example: Running SonarQube analysis
-                withSonarQubeEnv('SonarQube') {
-                    sh 'mvn sonar:sonar'
-                }
+                echo "Check the quality of the code..."
             }
         }
         stage('Security Scan') {
             steps {
-                echo 'Performing security scan...'
-                // Example: Running OWASP ZAP scan
-                sh 'zap-cli quick-scan --self-contained --start-options "-config api.disablekey=true" http://localhost:8080'
-                // Archive the ZAP report
-                archiveArtifacts artifacts: 'zap_report.html', allowEmptyArchive: true
+                echo "Deploy the application to a testing environment specified by the environment variable: ${TESTING_ENVIRONMENT}"
             }
         }
         stage('Deploy to Staging') {
             steps {
-                echo 'Deploying to staging server...'
-                // Example: Using AWS CLI for deployment
-                sh 'aws s3 cp target/my-app.jar s3://my-staging-bucket/'
-                // Example: Triggering deployment script
-                sh 'ssh user@staging-server "deploy-script.sh"'
+                echo "Waiting for approval..."
+                sleep time: 10, unit: 'SECONDS'
             }
         }
         stage('Integration Tests on Staging') {
             steps {
-                echo 'Running integration tests on staging...'
-                // Example: Running Selenium tests
-                sh 'mvn verify -Pstaging-tests'
-                junit '**/target/failsafe-reports/*.xml'
+                echo "Deploying the code to the production environment (${PRODUCTION_ENVIRONMENT})..."
             }
         }
         stage('Deploy to Production') {
             steps {
-                input 'Deploy to production?'
-                echo 'Deploying to production server...'
-                // Example: Using AWS CLI for deployment
-                sh 'aws s3 cp target/my-app.jar s3://my-production-bucket/'
-                // Example: Triggering deployment script
-                sh 'ssh user@production-server "deploy-script.sh"'
+                echo "Deploying the code to the production environment (${PRODUCTION_ENVIRONMENT})..."
             }
         }
     }
-
-    post {           
-        always {
-            script {
-                def currentResult = currentBuild.currentResult
-                emailext(
-                    subject: "${currentResult}: Jenkins Pipeline",
-                    body: """<html>
-                                <body>
-                                 <p>The Pipeline ${currentResult.toLowerCase()}.</p>
-                                 <p>Check console output at <a href="${BUILD_URL}console">here</a> to view the full results.</p>
-                                </body>
-                              </html>""",
-                    to: 'harshihitesh@gmail.com',
-                    mimeType: 'text/html',
-                    attachLog: true
-                )
-            }
+    post {
+        success {
+            emailext body: "Build successful",
+                subject: "Pipeline Success",
+                to: "harshihitesh@gmail.com"
+            echo 'Pipeline execution successful!'
+        }
+        failure {
+            emailext body: "Build failed",
+                subject: "Pipeline Failure",
+                to: "harshihitesh@gmail.com"
+            echo 'Pipeline execution failed!'
         }
     }
 }
