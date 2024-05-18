@@ -1,10 +1,12 @@
 pipeline {
     agent any
+    
     environment {
         DIRECTORY_PATH = "/path/to/code/directory"
         TESTING_ENVIRONMENT = "TestingEnvironment"
         PRODUCTION_ENVIRONMENT = "YourNameProduction"
     }
+    
     stages {
         stage('Build') {
             steps {
@@ -12,48 +14,57 @@ pipeline {
                 echo "Compile the code and generate any necessary artifacts"
             }
         }
+        
         stage('Unit and Integration Test') {
             steps {
                 echo "Running unit tests..."
                 echo "Running integration tests..."
             }
         }
+        
         stage('Code Analysis') {
             steps {
                 echo "Check the quality of the code..."
             }
         }
+        
         stage('Security Scan') {
             steps {
                 echo "Deploy the application to a testing environment specified by the environment variable: ${TESTING_ENVIRONMENT}"
             }
         }
+        
         stage('Deploy to Staging') {
             steps {
                 echo "Waiting for approval..."
                 sleep time: 10, unit: 'SECONDS'
             }
         }
+        
         stage('Integration Tests on Staging') {
             steps {
-                echo "Deploying the code to the production environment (${PRODUCTION_ENVIRONMENT})..."
+                echo "Deploying the code to the staging environment (${TESTING_ENVIRONMENT})..."
             }
         }
+        
         stage('Deploy to Production') {
             steps {
                 echo "Deploying the code to the production environment (${PRODUCTION_ENVIRONMENT})..."
             }
         }
     }
+    
     post {
         success {
-            emailext body: "Build successful",
+            emailext attachLog: true,
+                body: "Build successful",
                 subject: "Pipeline Success",
                 to: "harshihitesh@gmail.com"
             echo 'Pipeline execution successful!'
         }
         failure {
-            emailext body: "Build failed",
+            emailext attachLog: true,
+                body: "Build failed",
                 subject: "Pipeline Failure",
                 to: "harshihitesh@gmail.com"
             echo 'Pipeline execution failed!'
