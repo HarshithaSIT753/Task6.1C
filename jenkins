@@ -1,73 +1,94 @@
 pipeline {
     agent any
-    
-    environment {
-        DIRECTORY_PATH = "/path/to/code/directory"
-        TESTING_ENVIRONMENT = "TestingEnvironment"
-        PRODUCTION_ENVIRONMENT = "YourNameProduction"
-    }
-    
     stages {
         stage('Build') {
             steps {
-                echo "Fetch the source code from the directory path specified by the environment variable: ${DIRECTORY_PATH}"
-                echo "Compile the code and generate any necessary artifacts"
+                echo 'Performing build...'
+            }
+            post {
+                success {
+                    mail to: 'harshihitesh@gmail.com',
+                    subject: 'Pipeline Success',
+                    body: 'The pipeline completed successfully.'
+                }
+                failure {
+                             mail to: 'harshihitesh@gmail.com',
+                            subject: 'Pipeline Failure',
+                             body: 'The pipeline failed. Please check the Jenkins logs for more details.'
+                }
             }
         }
-        
-        stage('Unit and Integration Test') {
+        stage('Unit and Integration Tests') {
             steps {
-                echo "Running unit tests..."
-                echo "Running integration tests..."
+                echo 'Running unit and integration tests...'
+                // You can run tests using appropriate tools here
+            }
+            post {
+                success {
+                             mail to: 'harshihitesh@gmail.com',
+                            subject: 'Pipeline Success',
+                             body: 'The pipeline completed successfully.'
+                }
+                failure {
+                             mail to: 'harshihitesh@gmail.com',
+                             subject: 'Pipeline Failure',
+                             body: 'The pipeline failed. Please check the Jenkins logs for more details.'
+                }
             }
         }
-        
         stage('Code Analysis') {
             steps {
-                echo "Check the quality of the code..."
+                echo 'Performing code analysis...'
+                // Integrate a code analysis tool using Jenkins plugin
+            }
+            post {
+                success {
+                             mail to: 'harshihitesh@gmail.com',
+                             subject: 'Pipeline Success',
+                             body: 'The pipeline completed successfully.'
+                }
+                failure {
+                             mail to: 'harshihitesh@gmail.com',
+                             subject: 'Pipeline Failure',
+                             body: 'The pipeline failed. Please check the Jenkins logs for more details.'
+                }
             }
         }
-        
         stage('Security Scan') {
             steps {
-                echo "Deploy the application to a testing environment specified by the environment variable: ${TESTING_ENVIRONMENT}"
+                echo 'Performing security scan...'
+                // Perform a security scan using a specific tool, such as SonarQube or OWASP ZAP
+            }
+            post {
+                success {
+                             mail to: 'harshihitesh@gmail.com',
+                             subject: 'Pipeline Success',
+                             body: 'The pipeline completed successfully.'
+                }
+                failure {
+                             mail to: 'harshihitesh@gmail.com',
+                             subject: 'Pipeline Failure',
+                             body: 'The pipeline failed. Please check the Jenkins logs for more details.'
+                }
             }
         }
-        
         stage('Deploy to Staging') {
             steps {
-                echo "Waiting for approval..."
-                sleep time: 10, unit: 'SECONDS'
+                echo 'Deploying to staging...'
+                // Deploy the application to a staging server using a specific tool, such as AWS Elastic Beanstalk or Docker
             }
         }
-        
         stage('Integration Tests on Staging') {
             steps {
-                echo "Deploying the code to the staging environment (${TESTING_ENVIRONMENT})..."
+                echo 'Running integration tests on staging...'
+                // Run integration tests on the staging environment using a specific tool, such as Selenium or JMeter
             }
         }
-        
         stage('Deploy to Production') {
             steps {
-                echo "Deploying the code to the production environment (${PRODUCTION_ENVIRONMENT})..."
+                echo 'Deploying to production...'
+                // Deploy the application to a production server using a specific tool, such as AWS Elastic Beanstalk or Docker
             }
-        }
-    }
-    
-    post {
-        success {
-            emailext attachLog: true,
-                body: "Build successful",
-                subject: "Pipeline Success",
-                to: "harshithashashidhar28@gmail.com"
-            echo 'Pipeline execution successful!'
-        }
-        failure {
-            emailext attachLog: true,
-                body: "Build failed",
-                subject: "Pipeline Failure",
-                to: "harshithashashidhar28@gmail.com"
-            echo 'Pipeline execution failed!'
         }
     }
 }
